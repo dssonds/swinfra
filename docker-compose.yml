@@ -8,65 +8,30 @@ services:
     restart: always
     depends_on:
       - gitlab
-      - jenkins
-      - artifact
     hostname: proxy
     image: nginx
     ports:
-      - 8888:80    # gitlab http
-      - 8443:443   # gitlab https
-      - 8080:8080 # jenkins https
-      - 8081:8081 # artifact https
-      - 8082:8082 # artifact http
-      #- 8090:8090 # testlink https
+      - 80:80     # gitlab http
+      - 443:443   # gitlab https
     volumes:
       - ./proxy/nginx.conf:/etc/nginx/nginx.conf
-      #- /etc/letsencrypt:/etc/ssl/private
+      - ./key.0419:/etc/ssl/private
 
   gitlab:
-    image: 'gitlab/gitlab-ce:latest'
+    image: 'gitlab/gitlab-ce:13.12.5-ce.0'
     restart: always
     hostname: 'gitlab'
     container_name: gitlab-c
     environment:
       GITLAB_OMNIBUS_CONFIG: |
-        external_url 'https://gitlab.kvision.ai'
+        external_url 'https://gitlab.kvisiondev.com'
         # Add any other gitlab.rb configuration here, each on its own line
     ports:
       #- '80:80'
       #- '443:443'
-      - '2200:22'
+      - '1022:22'
     volumes:
-      - '/volume1/gitlab/config:/etc/gitlab'
-      - '/volume1/gitlab/logs:/var/log/gitlab'
-      - '/volume1/gitlab/data:/var/opt/gitlab'
-      - '/volume1/gitlab/backups:/var/opt/gitlab/backups'
-
-  jenkins:
-    image: 'jenkinsci/blueocean:latest'
-    hostname: 'jenkins'
-    container_name: jenkins-c
-    restart: always
-    ports:
-      #- '8080:8080'
-      - '50000:50000'
-    volumes:
-      - '/volume1/jenkins:/var/jenkins_home'
-      - '/var/run/docker.sock:/var/run/docker.sock'
-
-  artifact:
-    image: docker.bintray.io/jfrog/artifactory-cpp-ce:latest
-    container_name: artifact-c
-    restart: always
-#    ports:
-#        - 8081:8081
-#    environment:
-#      - VIRTUAL_HOST=artifactory.humaxdigital.com
-    environment:
-      DOCKER_DAEMON_ARGS: --storage-opt dm.basesize=60G
-#    extra_hosts:
-#      - "ldap:10.0.0.2"
-    volumes:
-#      /mnt/data3/artifactory 1030:1030 own
-      - /volume1/artifactory:/var/opt/jfrog/artifactory
-
+      - '/mnt/gitlab/config:/etc/gitlab'
+      - '/mnt/gitlab/logs:/var/log/gitlab'
+      - '/mnt/gitlab/data:/var/opt/gitlab'
+      - '/mnt/gitlab/backups:/var/opt/gitlab/backups'
